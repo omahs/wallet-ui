@@ -67,7 +67,7 @@ async function init() {
     availableLogins.value = await fetchAvailableLogins(authProvider)
 
     if (user.isLoggedIn) {
-      router.push('/')
+      router.push(`/${appId}/`)
     } else {
       parentConnection = createParentConnection({
         ...penpalMethods,

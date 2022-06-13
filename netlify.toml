@@ -2,3 +2,19 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+[[edge_functions]]
+  path = "/:appId/login"
+  function = "csp"
+
+[[edge_functions]]
+  path = "/:appId/signMessage"
+  function = "csp"
+
+[[edge_functions]]
+  path = "/:appId/"
+  function = "csp"
+
+[[edge_functions]]
+  path = "/:appId/redirect"
+  function = "csp-redirect"

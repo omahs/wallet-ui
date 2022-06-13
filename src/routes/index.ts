@@ -15,12 +15,12 @@ const routes = [
     component: LoginRedirect,
   },
   {
-    path: '/',
+    path: '/:appId/',
     component: HomePage,
   },
   {
     name: 'signMessage',
-    path: '/signMessage',
+    path: '/:appId/signMessage',
     component: SignMessage,
   },
 ]
