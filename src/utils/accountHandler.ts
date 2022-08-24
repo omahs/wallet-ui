@@ -13,6 +13,14 @@ import {
   setLengthLeft,
 } from 'ethereumjs-util'
 import { ethers } from 'ethers'
+import { JsonRpcRequest } from 'json-rpc-engine'
+
+import {
+  MessageParams,
+  TransactionParams,
+  TypedMessageParams,
+  createWalletMiddleware,
+} from '@/utils/walletMiddleware'
 
 export class AccountHandler {
   wallet: ethers.Wallet
@@ -25,12 +33,64 @@ export class AccountHandler {
     )
   }
 
+  setProvider(url: string) {
+    this.provider = new ethers.providers.JsonRpcProvider(url)
+  }
+
+  asMiddleware() {
+    return createWalletMiddleware({
+      processEthSignMessage: this.ethSign,
+      getAccounts: this.getAccounts,
+      requestAccounts: this.getAccounts,
+      processEncryptionPublicKey: this.getEncryptionPublicKey,
+      processSignTransaction: this.signTransaction,
+      processTypedMessageV4: this.signTypedMessageV4,
+      processTransaction: this.sendTransaction,
+    })
+  }
+
+  sendTransaction = async (
+    p: TransactionParams,
+    req: JsonRpcRequest<unknown>
+  ): Promise<string> => {
+    return (await this.requestSendTransaction(req.params, p.from)) as string
+  }
+
+  getAccounts = async (): Promise<string[]> => {
+    return this.getAddress()
+  }
+
+  ethSign = async (p: MessageParams): Promise<string> => {
+    return await this.requestSign(p.from, p.data)
+  }
+
+  getEncryptionPublicKey = async (from: string): Promise<string> => {
+    return this.getPublicKey(from)
+  }
+
+  signTransaction = async (p: TransactionParams): Promise<string> => {
+    const r = await this.requestSignTransaction(p, p.from)
+    return r.raw
+  }
+
+  personalSign = async (p: MessageParams): Promise<string> => {
+    return await this.requestPersonalSign(p.from, p.data)
+  }
+
+  ethDecrypt = async (p: MessageParams): Promise<string> => {
+    return this.requestDecryption(p.data, p.from)
+  }
+
+  signTypedMessageV4 = async (p: TypedMessageParams): Promise<string> => {
+    return this.requestSignTypedMessage(p.data, p.from)
+  }
+
   getAccount(): { address: string; publicKey: string } {
     const { address, publicKey } = this.wallet
     return { address, publicKey }
   }
 
-  getAccounts(): string[] {
+  getAddress(): string[] {
     return [this.wallet.address]
   }
 

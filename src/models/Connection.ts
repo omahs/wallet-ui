@@ -40,7 +40,7 @@ type Response = {
 }
 
 type ProviderConnectInfo = {
-  chainId: string | number
+  chainId: string
 }
 
 type RedirectParentConnectionApi = {
@@ -54,7 +54,7 @@ type ParentConnectionApi = {
   onMethodResponse(method: RequestMethod, response: Response): void
   sendPendingRequestCount(count: number): void
   getParentUrl(): string
-  onEvent(event: string, chain?: ProviderConnectInfo): void
+  onEvent(event: string, params?: ProviderConnectInfo): void
   getAppMode(): Promise<AppMode>
   triggerSocialLogin(type: SocialLoginType): void
   triggerPasswordlessLogin(email: string): void
