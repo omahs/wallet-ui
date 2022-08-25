@@ -41,7 +41,6 @@ class RequestHandler {
     this.config = c
     this.handler = this.initRpcEngine(c)
     this.accountHandler.setProvider(c.rpcUrls[0])
-
     // Emit `chainChanged` event
     const chainId = await this.accountHandler.getChainId()
     this.emitEvent('chainChanged', { chainId })
@@ -67,6 +66,13 @@ class RequestHandler {
       return new Error(`Could not find ${fn} function on connection`)
     }
     return new Error('No connection')
+  }
+
+  public async reply(method, response) {
+    const c = await this.getConnection('onMethodResponse')
+    if (!(c instanceof Error)) {
+      c.onMethodResponse(method, response)
+    }
   }
 
   public request(request: JsonRpcRequest<unknown>) {

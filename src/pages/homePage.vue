@@ -15,7 +15,7 @@ import { createParentConnection } from '@/utils/createParentConnection'
 import { getAuthProvider } from '@/utils/getAuthProvider'
 import getValidAppMode from '@/utils/getValidAppMode'
 import { getWalletType } from '@/utils/getwalletType'
-import { Keeper } from '@/utils/keeper'
+import { RequestHandler } from '@/utils/requestHandler'
 import {
   getSendRequestFn,
   handleRequest,
@@ -53,8 +53,8 @@ async function connectionToParent() {
 
   const walletAddress = accountHandler.getAccounts()[0]
   user.setWalletAddress(walletAddress)
-
-  const keeper = new Keeper(walletType, accountHandler)
+  // const rpcConfig = rpcStore.rpcConfig
+  const keeper = new RequestHandler(accountHandler)
 
   const sendRequest = getSendRequestFn(handleRequest, requestStore, appStore)
 
@@ -73,6 +73,9 @@ async function connectionToParent() {
 
   const chainId = await accountHandler.getChainId()
   const parentConnectionInstance = await parentConnection.promise
+  const rpcConfig = await parentConnectionInstance.getRpcConfig()
+  await keeper.setRpcConfig(rpcConfig)
+
   const appModeFromParent = await parentConnectionInstance.getAppMode()
   const validAppMode = getValidAppMode(walletType, appModeFromParent)
   appStore.setAppMode(validAppMode)

@@ -39,13 +39,15 @@ export class AccountHandler {
 
   asMiddleware() {
     return createWalletMiddleware({
-      processEthSignMessage: this.ethSign,
       getAccounts: this.getAccounts,
       requestAccounts: this.getAccounts,
       processEncryptionPublicKey: this.getEncryptionPublicKey,
+      processPersonalMessage: this.personalSign,
+      processEthSignMessage: this.ethSign,
       processSignTransaction: this.signTransaction,
       processTypedMessageV4: this.signTypedMessageV4,
       processTransaction: this.sendTransaction,
+      processDecryptMessage: this.ethDecrypt,
     })
   }
 
@@ -154,7 +156,7 @@ export class AccountHandler {
     }
   }
 
-  async requestSendTransaction(data, address: string) {
+  async requestSendTransaction(data, address: string): Promise<string> {
     try {
       const wallet = this.getWallet(address)
       if (wallet) {
@@ -165,7 +167,7 @@ export class AccountHandler {
         throw new Error('No Wallet found for the provided address')
       }
     } catch (e) {
-      return e
+      return Promise.reject(e)
     }
   }
 
