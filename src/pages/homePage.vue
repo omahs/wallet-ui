@@ -51,9 +51,9 @@ async function connectionToParent() {
 
   const accountHandler = new AccountHandler(privateKey)
 
-  const walletAddress = accountHandler.getAccounts()[0]
-  user.setWalletAddress(walletAddress)
-  // const rpcConfig = rpcStore.rpcConfig
+  const account = accountHandler.getAccount()
+  user.setWalletAddress(account.address)
+
   const keeper = new RequestHandler(accountHandler)
 
   const sendRequest = getSendRequestFn(handleRequest, requestStore, appStore)
@@ -84,9 +84,11 @@ async function connectionToParent() {
 }
 
 async function getRpcConfig() {
-  const parentConnectionInstance = await parentConnection.promise
-  const rpcConfig = await parentConnectionInstance.getRpcConfig()
-  rpcStore.setRpcConfig(rpcConfig)
+  if (parentConnection) {
+    const parentConnectionInstance = await parentConnection.promise
+    const rpcConfig = await parentConnectionInstance.getRpcConfig()
+    rpcStore.setRpcConfig(rpcConfig)
+  }
 }
 
 async function handleGetPublicKey(id, verifier) {

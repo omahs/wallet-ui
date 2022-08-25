@@ -39,52 +39,54 @@ export class AccountHandler {
 
   asMiddleware() {
     return createWalletMiddleware({
-      getAccounts: this.getAccounts,
-      requestAccounts: this.getAccounts,
-      processEncryptionPublicKey: this.getEncryptionPublicKey,
-      processPersonalMessage: this.personalSign,
-      processEthSignMessage: this.ethSign,
-      processSignTransaction: this.signTransaction,
-      processTypedMessageV4: this.signTypedMessageV4,
-      processTransaction: this.sendTransaction,
-      processDecryptMessage: this.ethDecrypt,
+      getAccounts: this.getAccountsWrapper,
+      requestAccounts: this.getAccountsWrapper,
+      processEncryptionPublicKey: this.getEncryptionPublicKeyWrapper,
+      processPersonalMessage: this.personalSignWrapper,
+      processEthSignMessage: this.getEthSignWrapper,
+      processSignTransaction: this.signTransactionWrapper,
+      processTypedMessageV4: this.signTypedMessageV4Wrapper,
+      processTransaction: this.sendTransactionWrapper,
+      processDecryptMessage: this.decryptWrapper,
     })
   }
 
-  sendTransaction = async (
+  sendTransactionWrapper = async (
     p: TransactionParams,
     req: JsonRpcRequest<unknown>
   ): Promise<string> => {
-    return (await this.requestSendTransaction(req.params, p.from)) as string
+    return (await this.sendTransaction(req.params, p.from)) as string
   }
 
-  getAccounts = async (): Promise<string[]> => {
+  getAccountsWrapper = async (): Promise<string[]> => {
     return this.getAddress()
   }
 
-  ethSign = async (p: MessageParams): Promise<string> => {
-    return await this.requestSign(p.from, p.data)
+  ethSignWrapper = async (p: MessageParams): Promise<string> => {
+    return await this.sign(p.from, p.data)
   }
 
-  getEncryptionPublicKey = async (from: string): Promise<string> => {
+  getEncryptionPublicKeyWrapper = async (from: string): Promise<string> => {
     return this.getPublicKey(from)
   }
 
-  signTransaction = async (p: TransactionParams): Promise<string> => {
-    const r = await this.requestSignTransaction(p, p.from)
+  signTransactionWrapper = async (p: TransactionParams): Promise<string> => {
+    const r = await this.signTransaction(p, p.from)
     return r.raw
   }
 
-  personalSign = async (p: MessageParams): Promise<string> => {
-    return await this.requestPersonalSign(p.from, p.data)
+  personalSignWrapper = async (p: MessageParams): Promise<string> => {
+    return await this.personalSign(p.from, p.data)
   }
 
-  ethDecrypt = async (p: MessageParams): Promise<string> => {
-    return this.requestDecryption(p.data, p.from)
+  decryptWrapper = async (p: MessageParams): Promise<string> => {
+    return this.decrypt(p.data, p.from)
   }
 
-  signTypedMessageV4 = async (p: TypedMessageParams): Promise<string> => {
-    return this.requestSignTypedMessage(p.data, p.from)
+  signTypedMessageV4Wrapper = async (
+    p: TypedMessageParams
+  ): Promise<string> => {
+    return this.signTypedMessage(p.data, p.from)
   }
 
   getAccount(): { address: string; publicKey: string } {
@@ -96,7 +98,7 @@ export class AccountHandler {
     return [this.wallet.address]
   }
 
-  getWallet(address: string): ethers.Wallet | undefined {
+  private getWallet(address: string): ethers.Wallet | undefined {
     if (this.wallet.address.toUpperCase() === address.toUpperCase()) {
       return this.wallet
     }
@@ -108,7 +110,7 @@ export class AccountHandler {
     return (await this.provider.detectNetwork()).chainId
   }
 
-  getPublicKey(address: string): string {
+  private getPublicKey(address: string): string {
     const wallet = this.getWallet(address)
     if (wallet) {
       return this.wallet.publicKey
@@ -117,7 +119,7 @@ export class AccountHandler {
     }
   }
 
-  async requestSign(address: string, msg: string): Promise<string> {
+  private async sign(address: string, msg: string): Promise<string> {
     try {
       const wallet = this.getWallet(address)
       if (wallet) {
@@ -139,7 +141,7 @@ export class AccountHandler {
     }
   }
 
-  async requestPersonalSign(address: string, msg: string) {
+  private async personalSign(address: string, msg: string) {
     try {
       const wallet = this.getWallet(address)
       if (wallet) {
@@ -156,7 +158,7 @@ export class AccountHandler {
     }
   }
 
-  async requestSendTransaction(data, address: string): Promise<string> {
+  private async sendTransaction(data, address: string): Promise<string> {
     try {
       const wallet = this.getWallet(address)
       if (wallet) {
@@ -171,7 +173,7 @@ export class AccountHandler {
     }
   }
 
-  async requestDecryption(ciphertext: string, address: string) {
+  private async decrypt(ciphertext: string, address: string) {
     try {
       const wallet = this.getWallet(address)
       if (wallet) {
@@ -189,7 +191,7 @@ export class AccountHandler {
     }
   }
 
-  async requestSignTransaction(txData, address: string) {
+  private async signTransaction(txData, address: string) {
     try {
       const wallet = this.getWallet(address)
       if (wallet) {
@@ -212,7 +214,7 @@ export class AccountHandler {
     }
   }
 
-  async requestSignTypedMessage(data, address: string) {
+  private async signTypedMessage(data, address: string) {
     const wallet = this.getWallet(address)
     if (wallet) {
       const parsedData = JSON.parse(data)

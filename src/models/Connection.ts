@@ -1,5 +1,6 @@
 import { AppConfig, AppMode, RpcConfig } from '@arcana/auth'
 import type { SocialLoginType } from '@arcana/auth-core'
+import { JsonRpcRequest, PendingJsonRpcResponse } from 'json-rpc-engine'
 
 type RequestMethod =
   | 'eth_sign'
@@ -22,26 +23,21 @@ const PERMISSIONS: Record<RequestMethod, boolean> = Object.freeze({
   eth_getEncryptionPublicKey: false,
 })
 
-type Request = {
-  id: number
-  method: RequestMethod
-  params: string[]
-}
-
-function requirePermission(request: Request, appMode: AppMode): boolean {
+function requirePermission(
+  request: JsonRpcRequest<unknown>,
+  appMode: AppMode
+): boolean {
   if (appMode === AppMode.NoUI) return false
   return PERMISSIONS[request.method]
 }
 
-type Response = {
-  id: number
-  result: unknown
-  error?: string
-}
-
-type ProviderConnectInfo = {
-  chainId: string
-}
+type ProviderEvent =
+  | {
+      chainId: number
+    }
+  | string[]
+  | string
+  | { type: string; data: unknown }
 
 type RedirectParentConnectionApi = {
   redirect(parentAppUrl: string | null): Promise<void>
@@ -51,10 +47,13 @@ type RedirectParentConnectionApi = {
 type ParentConnectionApi = {
   getAppConfig(): AppConfig
   getRpcConfig(): RpcConfig
-  onMethodResponse(method: RequestMethod, response: Response): void
+  onMethodResponse(
+    method: string,
+    response: PendingJsonRpcResponse<unknown>
+  ): void
   sendPendingRequestCount(count: number): void
   getParentUrl(): string
-  onEvent(event: string, params?: ProviderConnectInfo): void
+  onEvent(event: string, params?: ProviderEvent): void
   getAppMode(): Promise<AppMode>
   triggerSocialLogin(type: SocialLoginType): void
   triggerPasswordlessLogin(email: string): void
@@ -70,7 +69,6 @@ export type {
   RedirectParentConnectionApi,
   ParentConnectionApi,
   InitParentConnectionApi,
-  Request,
   RequestMethod,
-  Response,
+  ProviderEvent,
 }

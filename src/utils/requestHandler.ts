@@ -17,7 +17,7 @@ import {
 } from 'json-rpc-engine'
 import type { Connection } from 'penpal'
 
-import { ParentConnectionApi } from '@/models/Connection'
+import { ParentConnectionApi, ProviderEvent } from '@/models/Connection'
 import { AccountHandler } from '@/utils/accountHandler'
 
 interface RpcConfig {
@@ -34,11 +34,9 @@ interface RpcConfig {
 class RequestHandler {
   private handler?: JsonRpcEngine
   private connection?: Connection<ParentConnectionApi> | null
-  private config?: RpcConfig
   constructor(private accountHandler: AccountHandler) {}
 
   public async setRpcConfig(c: RpcConfig) {
-    this.config = c
     this.handler = this.initRpcEngine(c)
     this.accountHandler.setProvider(c.rpcUrls[0])
     // Emit `chainChanged` event
@@ -46,7 +44,7 @@ class RequestHandler {
     this.emitEvent('chainChanged', { chainId })
   }
 
-  public async emitEvent(e: string, params?: unknown) {
+  public async emitEvent(e: string, params?: ProviderEvent) {
     const c = await this.getConnection('onEvent')
     if (!(c instanceof Error)) {
       c.onEvent(e, params)
@@ -68,7 +66,10 @@ class RequestHandler {
     return new Error('No connection')
   }
 
-  public async reply(method, response) {
+  public async reply(
+    method: string,
+    response: PendingJsonRpcResponse<unknown>
+  ) {
     const c = await this.getConnection('onMethodResponse')
     if (!(c instanceof Error)) {
       c.onMethodResponse(method, response)
