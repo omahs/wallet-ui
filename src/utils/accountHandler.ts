@@ -62,7 +62,7 @@ export class AccountHandler {
     return this.getAddress()
   }
 
-  ethSignWrapper = async (p: MessageParams): Promise<string> => {
+  getEthSignWrapper = async (p: MessageParams): Promise<string> => {
     return await this.sign(p.from, p.data)
   }
 
