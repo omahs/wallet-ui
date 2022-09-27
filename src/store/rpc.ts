@@ -38,8 +38,19 @@ export const useRpcStore = defineStore('rpcStore', {
     },
     selectedRpcConfig(state: RpcConfigState): RpcConfigWallet {
       const { selectedChainId } = state
-      if (this.rpcConfigs) return this.rpcConfigs[selectedChainId]
-      else return CHAIN_LIST[DEFAULT_CHAIN_ID]
+      if (this.rpcConfigs) {
+        return this.rpcConfigs[selectedChainId]
+      } else {
+        const found = CHAIN_LIST.find(
+          (chain) => chain.chainId == DEFAULT_CHAIN_ID
+        )
+        if (found) {
+          return found
+        } else {
+          // Default to Arcana dev
+          return CHAIN_LIST[7]
+        }
+      }
     },
     rpcConfigList(state: RpcConfigState): Array<RpcConfigWallet> {
       return Object.values(state.rpcConfigs || {})

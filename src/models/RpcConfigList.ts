@@ -4,7 +4,7 @@ interface RpcConfigWallet extends RpcConfig {
   favicon: string
 }
 
-const CHAIN_LIST = [
+const CHAIN_LIST: RpcConfigWallet[] = [
   {
     chainId: 1,
     rpcUrls: ['https://cloudflare-eth.com/'],
