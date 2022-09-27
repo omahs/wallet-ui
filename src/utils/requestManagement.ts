@@ -9,6 +9,7 @@ function getSendRequestFn(handleRequest, requestStore, appStore) {
 
 async function watchRequestQueue(store, keeper) {
   const connectionInstance = await keeper.connection.promise
+  store.$reset()
   store.$subscribe((_, state) => {
     const { processQueue, pendingRequests } = state
     const pendingRequestCount = Object.values(pendingRequests).length

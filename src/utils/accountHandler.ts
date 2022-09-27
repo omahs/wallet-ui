@@ -10,6 +10,32 @@ import { ethers } from 'ethers'
 interface TransactionData extends ethers.providers.TransactionRequest {
   from: string
 }
+const allowedKeys = [
+  'to',
+  'from',
+  'nonce',
+  'gasLimit',
+  'gasPrice',
+  'data',
+  'value',
+  'chainId',
+  'type',
+  'accessList',
+  'maxPriorityFeePerGas',
+  'maxFeePerGas',
+  'customData',
+  'ccipReadEnabled',
+]
+
+function filterTransactionData(txObj: TransactionData): TransactionData {
+  const filtered = Object.keys(txObj)
+    .filter((key) => allowedKeys.includes(key))
+    .reduce((obj, key) => {
+      obj[key] = txObj[key]
+      return obj
+    }, {})
+  return filtered as TransactionData
+}
 
 export class AccountHandler {
   wallet: ethers.Wallet
@@ -119,12 +145,17 @@ export class AccountHandler {
     try {
       const wallet = this.getConnectedWallet(txData.from)
       if (wallet) {
-        const tx = await wallet.sendTransaction({ ...txData })
+        const data = filterTransactionData(txData)
+        if (!data.gasPrice) {
+          data.gasPrice = await wallet.getGasPrice()
+        }
+        const tx = await wallet.sendTransaction({ ...data })
         return tx.hash
       } else {
         throw new Error('No Wallet found for the provided address')
       }
     } catch (e) {
+      console.log(e)
       return Promise.reject(e)
     }
   }
@@ -133,7 +164,8 @@ export class AccountHandler {
     try {
       const wallet = this.getConnectedWallet(txData.from)
       if (wallet) {
-        const sig = await wallet.signTransaction({ ...txData })
+        const data = filterTransactionData(txData)
+        const sig = await wallet.signTransaction({ ...data })
         return sig
       } else {
         throw new Error('No Wallet found for the provided address')

@@ -16,6 +16,9 @@ const DEFAULT_APP_MODE = {
 }
 
 function getValidAppMode(walletType: WalletType, appMode?: AppMode): AppMode {
+  if (walletType === null) {
+    walletType = WalletType.UI
+  }
   const allowedModes = WALLET_TYPE_APP_MODE_MAPPINGS[walletType]
   if (appMode === undefined) return allowedModes[0]
   return allowedModes.includes(appMode) ? appMode : DEFAULT_APP_MODE[walletType]

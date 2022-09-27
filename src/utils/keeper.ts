@@ -73,9 +73,11 @@ export class Keeper {
         try {
           if (isTransactionDataArray(request.params)) {
             const param = request.params[0]
-            param.gasPrice = ethers.utils
-              .parseEther(convertGweiToEth(param.gasPrice))
-              .toHexString()
+            if (param.gasPrice) {
+              param.gasPrice = ethers.utils
+                .parseEther(convertGweiToEth(param.gasPrice))
+                .toHexString()
+            }
             response.result = await this.accountHandler.requestSendTransaction(
               request.params[0]
             )
