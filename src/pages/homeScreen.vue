@@ -172,6 +172,7 @@ function setRpcConfigs() {
 async function getRpcConfig() {
   try {
     showLoader('Loading')
+    if (rpcStore.selectedChainId) return
     const parentConnectionInstance = await parentConnection.promise
     const rpcConfig = await parentConnectionInstance.getRpcConfig()
     rpcStore.setSelectedChainId(rpcConfig.chainId)

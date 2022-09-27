@@ -1,10 +1,6 @@
 import { defineStore } from 'pinia'
 
-import {
-  RpcConfigWallet,
-  DEFAULT_CHAIN_ID,
-  CHAIN_LIST,
-} from '@/models/RpcConfigList'
+import { RpcConfigWallet, CHAIN_LIST } from '@/models/RpcConfigList'
 
 type RpcConfigs = {
   [chainId: number]: RpcConfigWallet
@@ -19,7 +15,7 @@ type RpcConfigState = {
 export const useRpcStore = defineStore('rpcStore', {
   state: () =>
     ({
-      selectedChainId: DEFAULT_CHAIN_ID,
+      selectedChainId: 0,
       walletBalance: '',
       rpcConfigs: null,
     } as RpcConfigState),
@@ -42,7 +38,7 @@ export const useRpcStore = defineStore('rpcStore', {
         return this.rpcConfigs[selectedChainId]
       } else {
         const found = CHAIN_LIST.find(
-          (chain) => chain.chainId == DEFAULT_CHAIN_ID
+          (chain) => chain.chainId == selectedChainId
         )
         if (found) {
           return found
