@@ -19,6 +19,7 @@ import ProfileScreen from '@/pages/profileScreen.vue'
 import RequestsScreen from '@/pages/RequestsScreen.vue'
 import SelectNftScreen from '@/pages/SelectNftScreen.vue'
 import SignInV2 from '@/pages/signInV2.vue'
+import SignInV3 from '@/pages/signInV3.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -36,6 +37,10 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/:appId/v2/login',
     component: SignInV2,
+  },
+  {
+    path: '/:appId/v3/login',
+    component: SignInV3,
   },
   {
     path: '/:appId/v2/init/',
