@@ -104,7 +104,27 @@ const initPasswordlessLogin = async (email: string) => {
 const initSocialLogin = async (type: SocialLogins): Promise<string> => {
   const val = await authProvider?.loginWithSocial(type)
   if (val) {
-    LoginState.social = val.state
+    if (val.promise) {
+      val.promise
+        .then(async () => {
+          console.log('login social promise resolved')
+          if (authProvider?.isLoggedIn()) {
+            const userInfo = authProvider?.getUserInfo()
+            if (userInfo) {
+              try {
+                await storeUserInfoAndRedirect(userInfo)
+              } catch (e) {
+                console.log('global_login_failed:store_and_redirect', { e })
+              }
+            }
+          }
+        })
+        .catch((e) => {
+          console.log('login social promise rejected', e)
+        })
+    } else {
+      LoginState.social = val.state
+    }
     return val.url
   }
   throw new Error("Couldn't get login url")
